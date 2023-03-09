@@ -255,4 +255,4 @@ M.Parent=L
 local N=Instance.new"UIPadding"
 N.PaddingLeft=UDim.new(0,4)
 N.Parent=L
-a.Parent = game.CoreGui
+return a
