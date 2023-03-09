@@ -2,7 +2,7 @@ local oldGui = game.CoreGui:FindFirstChild("Zombie Lab GUI")
 if oldGui then
 	oldGui:Destroy()
 end
-local gui = game:GetService("InsertService"):LoadLocalAsset("rbxassetid://12727847442")
+local gui = loadstring(game:HttpGet("https://raw.githubusercontent.com/silas2009/Zombie-Lab-GUI/main/resources/CreateUI.lua"))()
 gui.Parent = game:GetService("CoreGui")
 gui.Main.Active = true
 gui.Main.Draggable = true
