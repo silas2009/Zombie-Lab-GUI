@@ -9,13 +9,22 @@ gui.Main.Draggable = true
 gui.Main.Topbar.Container:FindFirstChildOfClass("TextButton").MouseButton1Click:Connect(function()
 	gui:Destroy()
 end)
----------------------------------------------------------
 script = gui:FindFirstChildOfClass("LocalScript")
 
+---------------------------------------------------------
 local lplr = game:GetService("Players").LocalPlayer
 local usernameInput = script.Parent.Main.Container.PlayerOptions.ScrollingFrame.Username.TextBox
 local icon = script.Parent.Main.Container.PlayerOptions.icon
+local InjectionStealerGui = loadstring(game:HttpGet("https://raw.githubusercontent.com/silas2009/Zombie-Lab-GUI/main/resources/InjectionStealerUI.lua"))()
+InjectionStealerGui.Parent = gui
+InjectionStealerGui.Active = true
+InjectionStealerGui.Draggable = true
+InjectionStealerGui.Topbar.Container.Exit.MouseButton1Click:Connect(function()
+	InjectionStealerGui.Visible = false
+	InjectionStealerGui.Position = UDim2.fromScale(0.5,0.5)
+end)
 local hovering = {}
+local injectionStealerConnections = {}
 
 local Hint = gui.Hint
 
@@ -80,6 +89,72 @@ function findPlr(search,keywords)
 	end
 end
 
+local ToolTemplate = script.Tool
+local showingTools = {}
+
+function makeToolUI(tool)
+	spawn(function()
+		local useSelf = tool:FindFirstChild("UseSelf")
+		if not table.find(showingTools,tool) and tool:IsA("Tool") and useSelf and useSelf:IsA("RemoteEvent") then
+			local toolUI = ToolTemplate:Clone()
+			if tool:FindFirstChild("Handle") and tool:FindFirstChild("Handle"):FindFirstChild("Liquid") then
+				toolUI.BackgroundColor3 = tool:FindFirstChild("Handle"):FindFirstChild("Liquid").Color
+			end
+			local toolName = toolUI:WaitForChild("ToolName")
+			toolName.Text = tool.Name
+			toolUI.Image = tool.TextureId
+			toolName.Visible = toolUI.Image == ""
+			tool.Destroying:Connect(function()
+				toolUI:Destroy()
+			end)
+			tool:GetPropertyChangedSignal("Parent"):Connect(function()
+				if tool.Parent == nil then
+					toolUI:Destroy()
+				end
+			end)
+			tool.Changed:Connect(function()
+				toolName.Text = tool.Name
+				toolUI.Image = tool.TextureId
+				toolName.Visible = toolUI.Image == ""
+			end)
+			toolUI.MouseButton1Click:Connect(function()
+				useSelf:FireServer()
+			end)
+			toolUI.Parent = InjectionStealerGui.Container.Buttons.ScrollingFrame
+		end
+	end)
+end
+
+function InjectionStealerActivate()
+	if #showingTools > 0 then
+		for i = #showingTools,1,-1 do
+			table.remove(showingTools,i)
+		end
+	end
+	InjectionStealerGui.Visible = true
+	InjectionStealerGui.Topbar.TextLabel.Text = "Injection Stealer"
+	for _,v in pairs(injectionStealerConnections) do
+		v:Disconnect()
+	end
+	for _,v in pairs(InjectionStealerGui.Container.Buttons.ScrollingFrame:GetChildren()) do
+		if v:IsA("GuiObject") then
+			v:Destroy()
+		end
+	end
+	table.insert(injectionStealerConnections,game.DescendantAdded:Connect(function(obj)
+		if obj:IsA("RemoteEvent") and obj.Name == "UseSelf" then
+			makeToolUI(obj.Parent)
+			table.insert(showingTools,obj)
+		end
+	end))
+	for _,v in pairs(game:GetDescendants()) do
+		if v:IsA("RemoteEvent") and v.Name == "UseSelf" then
+			makeToolUI(v.Parent)
+			table.insert(showingTools,v)
+		end
+	end
+end
+
 local categories = {
 	"General",
 	"Self",
@@ -89,11 +164,12 @@ local categories = {
 local injectionDebounce = false
 local humanDoor = workspace:FindFirstChild("HumanOnlyDoor")
 
+
 local commands = {
 	{
 		cmd = "Kill Zombie",
 		category = "Zombie",
-		description = "Kills the desired user by firing the gun event (Only works on Zombies)",
+		description = "Kills the target user by firing the gun event (Only works on Zombies)",
 		requiredArgs = {"plr"},
 		func = function(args)
 			local foundRemote = FindFirstDescendantOfClassAndName(game,"RemoteEvent","InflictTarget")
@@ -177,7 +253,7 @@ local commands = {
 	},
 	{
 		cmd = "Virus",
-		description = "Teleports you to the desired user and injects them with a Virus",
+		description = "Teleports you to the target user and injects them with a Virus",
 		category = "General",
 		requiredArgs = {"plr"},
 		func = function(args)
@@ -220,7 +296,7 @@ local commands = {
 	},
 	{
 		cmd = "Cure",
-		description = "Teleports you to the desired user and injects them with a Cure",
+		description = "Teleports you to the target user and injects them with a Cure",
 		category = "General",
 		requiredArgs = {"plr"},
 		func = function(args)
@@ -288,6 +364,15 @@ local commands = {
 		requiredArgs = {},
 		func = function(args)
 			lplr.PlayerGui.PlayerGui.ChooseSkinFrame.Visible = not lplr.PlayerGui.PlayerGui.ChooseSkinFrame.Visible
+		end,
+	},
+	{
+		cmd = "Steal player injections",
+		description = "Lets you steal injections other players are currently holding",
+		category = "General",
+		requiredArgs = {},
+		func = function(args)
+			InjectionStealerActivate()
 		end,
 	},
 }
