@@ -55,15 +55,22 @@ function alignPosition(plr1,plr2)
 end
 
 function formatDisplayName(plr)
-    if plr:IsA("Player") then
-        if plr.DisplayName == plr.Name then
-            return plr.Name
-        else
-            return string.format("%s (@%s)",plr.DisplayName,plr.Name)
-        end
-    else
-        return plr.Name
-    end
+	if plr:IsA("Player") then
+		if plr.DisplayName == plr.Name then
+			return plr.Name
+		else
+			return string.format("%s (@%s)",plr.DisplayName,plr.Name)
+		end
+	elseif plr:IsA("Model") and plr:FindFirstChildOfClass("Humanoid") and game:GetService("Players"):GetPlayerFromCharacter(plr) then
+		plr = game:GetService("Players"):GetPlayerFromCharacter(plr)
+		if plr.DisplayName == plr.Name then
+			return plr.Name
+		else
+			return string.format("%s (@%s)",plr.DisplayName,plr.Name)
+		end
+	else
+		return plr.Name
+	end
 end
 
 function findPlr(search,keywords)
