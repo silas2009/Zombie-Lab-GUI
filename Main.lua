@@ -54,6 +54,18 @@ function alignPosition(plr1,plr2)
 	return alignPos,alignOrientation
 end
 
+function formatDisplayName(plr)
+    if plr:IsA("Player") then
+        if plr.DisplayName == plr.Name then
+            return plr.Name
+        else
+            return string.format("%s (@%s)",plr.DisplayName,plr.Name)
+        end
+    else
+        return plr.Name
+    end
+end
+
 function findPlr(search,keywords)
 	if search then
 		if typeof(search) == "Instance" and search:IsA("Player") then
@@ -105,10 +117,12 @@ function makeToolUI(tool)
 			toolUI.Image = tool.TextureId
 			toolName.Visible = toolUI.Image == ""
 			tool.Destroying:Connect(function()
+				table.remove(hovering,table.find(hovering,toolUI))
 				toolUI:Destroy()
 			end)
 			tool:GetPropertyChangedSignal("Parent"):Connect(function()
 				if tool.Parent == nil then
+					table.remove(hovering,table.find(hovering,toolUI))
 					toolUI:Destroy()
 				end
 			end)
@@ -119,6 +133,21 @@ function makeToolUI(tool)
 			end)
 			toolUI.MouseButton1Click:Connect(function()
 				useSelf:FireServer()
+			end)
+			toolUI.MouseEnter:Connect(function()
+				table.insert(hovering,toolUI)
+				local plr = tool:FindFirstAncestorOfClass("Player") or tool:FindFirstAncestorOfClass("Model") or tool.Parent
+				Hint.Text = formatDisplayName(plr)
+			end)
+			toolUI.MouseLeave:Connect(function()
+				table.remove(hovering,table.find(hovering,toolUI))
+				Hint.Visible = #hovering > 0
+			end)
+			toolUI.InputChanged:Connect(function(input)
+				if table.find(hovering,toolUI) and input.UserInputType == Enum.UserInputType.MouseMovement then
+					Hint.Position = UDim2.fromOffset(input.Position.X+10,input.Position.Y)
+					Hint.Visible = #hovering > 0
+				end
 			end)
 			toolUI.Parent = InjectionStealerGui.Container.Buttons.ScrollingFrame
 		end
@@ -435,7 +464,6 @@ function loadButtons(category)
 			end)
 			button.MouseEnter:Connect(function()
 				table.insert(hovering,button)
-				Hint.Visible = #hovering > 0
 				Hint.Text = command.description
 			end)
 			button.MouseLeave:Connect(function()
@@ -445,6 +473,7 @@ function loadButtons(category)
 			button.InputChanged:Connect(function(input)
 				if table.find(hovering,button) and input.UserInputType == Enum.UserInputType.MouseMovement then
 					Hint.Position = UDim2.fromOffset(input.Position.X+10,input.Position.Y)
+					Hint.Visible = #hovering > 0
 				end
 			end)
 			button.Parent = buttonsContainer
