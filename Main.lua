@@ -194,7 +194,8 @@ end
 local categories = {
 	"General",
 	"Self",
-	"Zombie"
+	"Zombie",
+	"Teleports"
 }
 
 local injectionDebounce = false
@@ -411,6 +412,60 @@ local commands = {
 			InjectionStealerActivate()
 		end,
 	},
+	{
+		cmd = "Virus Room",
+		description = "",
+		category = "Teleports",
+		requiredArgs = {},
+		func = function(args)
+			game:GetService("Players").LocalPlayer.Character.PrimaryPart.CFrame = CFrame.new(-67, -15.5, -42)
+		end,
+	},
+	{
+		cmd = "Locker Room",
+		description = "",
+		category = "Teleports",
+		requiredArgs = {},
+		func = function(args)
+			game:GetService("Players").LocalPlayer.Character.PrimaryPart.CFrame = CFrame.new(-20, -15.5, 32)
+		end,
+	},
+	{
+		cmd = "Human Room",
+		description = "",
+		category = "Teleports",
+		requiredArgs = {},
+		func = function(args)
+			game:GetService("Players").LocalPlayer.Character.PrimaryPart.CFrame = CFrame.new(106, 3, 2)
+		end,
+	},
+	{
+		cmd = "Zombie Room",
+		description = "",
+		category = "Teleports",
+		requiredArgs = {},
+		func = function(args)
+			game:GetService("Players").LocalPlayer.Character.PrimaryPart.CFrame = CFrame.new(-70, 3, 90)
+		end,
+	},
+	{
+		cmd = "Cafeteria",
+		description = "",
+		category = "Teleports",
+		requiredArgs = {},
+		func = function(args)
+			game:GetService("Players").LocalPlayer.Character.PrimaryPart.CFrame = CFrame.new(102, 3, 62)
+		end,
+	},
+	{
+		cmd = "Outside",
+		description = "",
+		category = "Teleports",
+		requiredArgs = {},
+		func = function(args)
+			game:GetService("Players").LocalPlayer.Character.PrimaryPart.CFrame = CFrame.new(106, 3, 154)
+		end,
+	}
 }
 local categoryButtonTemplate = script:WaitForChild("Category")
 local buttonTemplate = script:WaitForChild("Button")
