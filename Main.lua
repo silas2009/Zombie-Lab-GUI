@@ -295,38 +295,62 @@ local commands = {
 		requiredArgs = {"plr"},
 		func = function(args)
 			local plr = findPlr(args[1])
-			if plr and plr.Character and plr.Character.PrimaryPart and plr.Team ~= game.Teams.Zombie then
-				if not injectionDebounce then
-					injectionDebounce = true
-					local injection = lplr.Backpack:FindFirstChild("Virus")
-					if not injection then
-						game:GetService("ReplicatedStorage"):FindFirstChild("Events").GiveVirus:FireServer()
-						injection = lplr.Backpack:WaitForChild("Virus")
-					end
+			if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Team ~= game.Teams.Zombie then
+				local injection = lplr.Backpack:FindFirstChild("Virus") or lplr.Character:FindFirstChild("Virus")
+				if not injection then
+					game:GetService("ReplicatedStorage"):FindFirstChild("Events").GiveVirus:FireServer()
+					injection = lplr.Backpack:WaitForChild("Virus")
+				end
+				if firetouchinterest then
 					if plr == lplr then
-						wait(0.1)
-						lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
+						injectionDebounce = true
 						injection.UseSelf:FireServer()
+						repeat wait() until not injection or not injection.Parent
+						injectionDebounce = false
 					else
-						local ogPos = lplr.Character.PrimaryPart.CFrame
-						local alignPos,alignOrientation = alignPosition(lplr,plr)
-						lplr.Character.PrimaryPart.CFrame = plr.Character.PrimaryPart.CFrame
-						lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Physics)
+						injectionDebounce = true
 						wait(0.1)
-						lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
-						injection:Activate()
-						wait(0.5)
-						alignPos.Attachment0:Destroy()
-						alignPos.attachment1:Destroy()
-						alignPos:Destroy()
-						alignOrientation:Destroy()
-						lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
-						for i = 1,10 do
-							wait()
-							lplr.Character.PrimaryPart.CFrame = ogPos
-						end
+						spawn(function()
+							while task.wait() do
+								if not injection or not injection.Parent then break end
+								lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
+								injection:Activate()
+								firetouchinterest(injection:WaitForChild("Handle"),plr.Character.HumanoidRootPart,0)
+								firetouchinterest(injection:WaitForChild("Handle"),plr.Character.HumanoidRootPart,1)
+							end
+						end)
+						repeat wait() until not injection or not injection.Parent
+						injectionDebounce = false
 					end
-					injectionDebounce = false
+				else
+					if not injectionDebounce then
+						injectionDebounce = true
+						if plr == lplr then
+							injectionDebounce = true
+							injection.UseSelf:FireServer()
+							repeat wait() until not injection or not injection.Parent
+							injectionDebounce = false
+						else
+							local ogPos = lplr.Character.PrimaryPart.CFrame
+							local alignPos,alignOrientation = alignPosition(lplr,plr)
+							lplr.Character.PrimaryPart.CFrame = plr.Character.PrimaryPart.CFrame
+							lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Physics)
+							wait(0.1)
+							lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
+							injection:Activate()
+							wait(0.5)
+							alignPos.Attachment0:Destroy()
+							alignPos.attachment1:Destroy()
+							alignPos:Destroy()
+							alignOrientation:Destroy()
+							lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
+							for i = 1,10 do
+								wait()
+								lplr.Character.PrimaryPart.CFrame = ogPos
+							end
+						end
+						injectionDebounce = false
+					end
 				end
 			end
 		end,
@@ -338,40 +362,62 @@ local commands = {
 		requiredArgs = {"plr"},
 		func = function(args)
 			local plr = findPlr(args[1])
-			if plr and plr.Character and plr.Character.PrimaryPart and plr.Team == game.Teams.Zombie then
-				if not injectionDebounce then
-					injectionDebounce = true
-					local injection = lplr.Backpack:FindFirstChild("Cure")
-					if not injection then
-						game:GetService("ReplicatedStorage"):FindFirstChild("Events").GiveCure:FireServer()
-						injection = lplr.Backpack:WaitForChild("Cure")
-					end
+			if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Team == game.Teams.Zombie then
+				local injection = lplr.Backpack:FindFirstChild("Cure") or lplr.Character:FindFirstChild("Cure")
+				if not injection then
+					game:GetService("ReplicatedStorage"):FindFirstChild("Events").GiveCure:FireServer()
+					injection = lplr.Backpack:WaitForChild("Cure")
+				end
+				if firetouchinterest then
 					if plr == lplr then
-						wait(0.1)
-						lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
-						wait(0.1)
+						injectionDebounce = true
 						injection.UseSelf:FireServer()
 						lplr.CharacterAdded:Wait()
+						injectionDebounce = false
 					else
-						local ogPos = lplr.Character.PrimaryPart.CFrame
-						local alignPos,alignOrientation = alignPosition(lplr,plr)
-						lplr.Character.PrimaryPart.CFrame = plr.Character.PrimaryPart.CFrame
-						lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Physics)
+						injectionDebounce = true
 						wait(0.1)
-						lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
-						injection:Activate()
-						wait(0.5)
-						alignPos.Attachment0:Destroy()
-						alignPos.attachment1:Destroy()
-						alignPos:Destroy()
-						alignOrientation:Destroy()
-						lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
-						for i = 1,10 do
-							wait()
-							lplr.Character.PrimaryPart.CFrame = ogPos
-						end
+						spawn(function()
+							while task.wait() do
+								if not injection or not injection.Parent then break end
+								lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
+								injection:Activate()
+								firetouchinterest(injection.Handle,plr.Character.HumanoidRootPart,0)
+								firetouchinterest(injection.Handle,plr.Character.HumanoidRootPart,1)
+							end
+						end)
+						repeat wait() until not injection or not injection.Parent
+						injectionDebounce = false
 					end
-					injectionDebounce = false
+				else
+					if not injectionDebounce then
+						injectionDebounce = true
+						if plr == lplr then
+							injectionDebounce = true
+							injection.UseSelf:FireServer()
+							lplr.CharacterAdded:Wait()
+							injectionDebounce = false
+						else
+							local ogPos = lplr.Character.PrimaryPart.CFrame
+							local alignPos,alignOrientation = alignPosition(lplr,plr)
+							lplr.Character.PrimaryPart.CFrame = plr.Character.PrimaryPart.CFrame
+							lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Physics)
+							wait(0.1)
+							lplr.Character:FindFirstChildOfClass("Humanoid"):EquipTool(injection)
+							injection:Activate()
+							wait(0.5)
+							alignPos.Attachment0:Destroy()
+							alignPos.attachment1:Destroy()
+							alignPos:Destroy()
+							alignOrientation:Destroy()
+							lplr.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
+							for i = 1,10 do
+								wait()
+								lplr.Character.PrimaryPart.CFrame = ogPos
+							end
+						end
+						injectionDebounce = false
+					end
 				end
 			end
 		end,
