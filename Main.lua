@@ -201,7 +201,6 @@ local categories = {
 local injectionDebounce = false
 local humanDoor = workspace:FindFirstChild("HumanOnlyDoor")
 
-
 local commands = {
 	{
 		cmd = "Kill Zombie",
@@ -225,6 +224,28 @@ local commands = {
 		end,
 	},
 	{
+		cmd = "Kill Zombie NPCs",
+		category = "Zombie",
+		description = "Kills all zombie NPCs (Basically free credits)",
+		requiredArgs = {},
+		func = function(args)
+			local foundRemote = FindFirstDescendantOfClassAndName(game,"RemoteEvent","InflictTarget")
+			for i,v in pairs(workspace.Zombies:GetChildren()) do
+				if v:FindFirstChildOfClass("Humanoid") then
+					foundRemote:FireServer(
+						v:FindFirstChildOfClass("Humanoid"),
+						v.HumanoidRootPart,
+						100,
+						Vector3.new(),
+						2,
+						0,
+						false
+					)
+				end
+			end
+		end,
+	},
+	{
 		cmd = "Get Cure Tool",
 		requiredArgs = {},
 		description = "Gives you the Cure tool",
@@ -239,16 +260,42 @@ local commands = {
 		description = "Gives you a Cookie",
 		category = "Self",
 		func = function(args)
-			local cookieGiver = workspace.Lab.CookieGiver.CookieGiver
+			local giver = workspace.Lab.Givers.CookieGiver
+			for i,v in pairs(workspace.Lab.Givers:GetChildren()) do
+				if v.Name == "CookieGiver" and v:IsA("BasePart") and v.Position == Vector3.new(191.75, 2.7, -3.95) then
+					giver = v
+				end
+			end
 			local ogPos = lplr.Character.PrimaryPart.CFrame
 			local ogCamCF = workspace.CurrentCamera.CFrame
-			lplr.Character.PrimaryPart.CFrame = cookieGiver.CFrame * CFrame.new(0,2.5,0)
+			lplr.Character.PrimaryPart.CFrame = giver.CFrame * CFrame.new(0,2.5,0)
 			task.wait()
-			workspace.CurrentCamera.CFrame = CFrame.lookAt(workspace.CurrentCamera.Focus.Position,cookieGiver.Position)
+			workspace.CurrentCamera.CFrame = CFrame.lookAt(workspace.CurrentCamera.Focus.Position,giver.Position)
 			task.wait(0.2)
-			cookieGiver.ProximityPrompt:InputHoldBegin()
+			giver.ProximityPrompt:InputHoldBegin()
 			task.wait()
-			cookieGiver.ProximityPrompt:InputHoldEnd()
+			giver.ProximityPrompt:InputHoldEnd()
+			task.wait(0.2)
+			workspace.CurrentCamera.CFrame = ogCamCF
+			lplr.Character.PrimaryPart.CFrame = ogPos
+		end,
+	},
+	{
+		cmd = "Get Burger",
+		requiredArgs = {},
+		description = "Gives you a Burger",
+		category = "Self",
+		func = function(args)
+			local giver = workspace.Lab.Givers.BurgerGiver
+			local ogPos = lplr.Character.PrimaryPart.CFrame
+			local ogCamCF = workspace.CurrentCamera.CFrame
+			lplr.Character.PrimaryPart.CFrame = giver.CFrame * CFrame.new(0,2.5,0)
+			task.wait()
+			workspace.CurrentCamera.CFrame = CFrame.lookAt(workspace.CurrentCamera.Focus.Position,giver.Position)
+			task.wait(0.2)
+			giver.ProximityPrompt:InputHoldBegin()
+			task.wait()
+			giver.ProximityPrompt:InputHoldEnd()
 			task.wait(0.2)
 			workspace.CurrentCamera.CFrame = ogCamCF
 			lplr.Character.PrimaryPart.CFrame = ogPos
@@ -284,7 +331,19 @@ local commands = {
 		func = function(args)
 			local door = workspace:FindFirstChild("AntiWeaponZone")
 			if door then
-				door:Destroy()
+				door:Remove()
+			end
+		end,
+	},
+	{
+		cmd = "Remove Anti-Glitch",
+		description = "Removes the anti-glitch zone so you can walk into the human room as a zombie without getting teleported.",
+		category = "General",
+		requiredArgs = {},
+		func = function(args)
+			local door = workspace:FindFirstChild("AntiGlitch")
+			if door then
+				door:Remove()
 			end
 		end,
 	},
@@ -301,7 +360,7 @@ local commands = {
 					game:GetService("ReplicatedStorage"):FindFirstChild("Events").GiveVirus:FireServer()
 					injection = lplr.Backpack:WaitForChild("Virus")
 				end
-				if firetouchinterest then
+				--[[if firetouchinterest then
 					if plr == lplr then
 						injectionDebounce = true
 						injection.UseSelf:FireServer()
@@ -322,7 +381,7 @@ local commands = {
 						repeat wait() until not injection or not injection.Parent
 						injectionDebounce = false
 					end
-				else
+				else--]]
 					if not injectionDebounce then
 						injectionDebounce = true
 						if plr == lplr then
@@ -351,7 +410,7 @@ local commands = {
 						end
 						injectionDebounce = false
 					end
-				end
+				--end
 			end
 		end,
 	},
@@ -368,7 +427,7 @@ local commands = {
 					game:GetService("ReplicatedStorage"):FindFirstChild("Events").GiveCure:FireServer()
 					injection = lplr.Backpack:WaitForChild("Cure")
 				end
-				if firetouchinterest then
+				--[[if firetouchinterest then
 					if plr == lplr then
 						injectionDebounce = true
 						injection.UseSelf:FireServer()
@@ -389,7 +448,7 @@ local commands = {
 						repeat wait() until not injection or not injection.Parent
 						injectionDebounce = false
 					end
-				else
+				else--]]
 					if not injectionDebounce then
 						injectionDebounce = true
 						if plr == lplr then
@@ -418,7 +477,7 @@ local commands = {
 						end
 						injectionDebounce = false
 					end
-				end
+				--end
 			end
 		end,
 	},
@@ -451,7 +510,7 @@ local commands = {
 	},
 	{
 		cmd = "Steal player injections",
-		description = "Lets you steal injections other players are currently holding",
+		description = "Lets you use injections other players are currently holding on yourself",
 		category = "General",
 		requiredArgs = {},
 		func = function(args)
